@@ -28,7 +28,7 @@ twitters %>%
   filter(!is.na(twitter)) %>%
   group_by(partido) %>%
   summarise(twittadas = sum(n_proprio)) %>%
-  filter(twittadas > 1000)%>%
+  filter(twittadas > 3000)%>%
   ggplot(aes(x = twittadas, fill= partido, color= partido)) + 
   geom_histogram()
 
@@ -38,8 +38,41 @@ twitters %>%
 ### 2 - Quais partidos tem mais engajamento por meio de seus parlamentares? 
 *Feeling:* - PSL, PT.
 
-### 3 - Parlamentares de qual casa são mais presentes na rede social, com base no numero de twittes? 
+```{r}
+twitters %>%
+  filter(!is.na(twitter)) %>%
+  group_by(partido) %>%
+  summarise(engajamento = sum(engaj_total)) %>%
+  filter(engajamento > 100000) %>%
+  ggplot(aes(x = partido, y = engajamento, fill = partido))+
+   geom_bar(stat='identity') +
+   coord_flip()
+```
+
+### 3 - Parlamentares de qual casa são mais presentes na rede social, percentualmente, com base no numero de twittes? 
 *Feeling:* - Deputados
+
+```{r}
+percentual_twitter <- function(casa_parlamentar){
+  num_total <- nrow(subset(twitters, casa == casa_parlamentar))
+  num_parlamentares_ativos = nrow(subset(twitters, casa == casa_parlamentar & !is.na(twitter)))
+  
+  return ((num_parlamentares_ativos/num_total)*100)
+}
+
+
+twitters %>%
+  filter(!is.na(twitter)) %>%
+  group_by(casa) %>%
+  summarise(percentual = percentual_twitter(casa)) %>%
+  ggplot(aes(x=casa, y=percentual, fill=casa)) + 
+  geom_bar(stat="identity")+
+  labs(
+        title="Percentual por casa", x="casa", y="percentual") +
+  theme_bw() + scale_fill_grey(start = 0, end = .9)
+
+
+```
 
 ### 4 - Qual a diferença entre numero total de deputados e o total de deputados engajados no twitter. 
 *Feeling:* - cerca de 50%
